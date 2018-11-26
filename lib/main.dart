@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:worcadeflutter/content.dart';
+import 'package:worcadeflutter/content_footer.dart';
+import 'package:worcadeflutter/message.dart';
 
 void main() => runApp(new MyApp());
 
@@ -43,19 +46,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -70,40 +60,47 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: new Text(widget.title),
       ),
-      body: new Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: new Column(
-          // Column is also layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug paint" (press "p" in the console where you ran
-          // "flutter run", or select "Toggle Debug Paint" from the Flutter tool
-          // window in IntelliJ) to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            new Text(
-              'You have pushed the button this many times:',
+      body: Container(
+          child: ListView(children: [
+            ContentWidget(
+              content: Content(
+                sourceName: 'Jorn',
+                messages: [
+                  Message('Hello there, Roel'),
+                  Message('How are you?'),
+                ],
+                mine: false,
+                footer: ContentFooter(
+                    time: DateTime.now().subtract(Duration(minutes: 3)),
+                    isRead: true),
+              ),
             ),
-            new Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.display1,
+            ContentWidget(
+              content: Content(
+                sourceName: 'Roel',
+                messages: [
+                  Message(
+                      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque sed nulla mollis, scelerisque mi vel, dapibus libero. Sed laoreet risus id pellentesque vulputate. Cras cursus felis efficitur ante lobortis, eu elementum justo mattis. Cras tincidunt dui vestibulum, vehicula ligula eget, tristique turpis. Aliquam dictum accumsan lorem sed blandit. Curabitur sed libero blandit, ultrices augue sed, egestas nisl. Fusce ornare, ligula ut condimentum dapibus, nunc sem suscipit elit, ac facilisis magna lectus vitae neque. Ut sit amet laoreet elit. Nunc neque augue, ullamcorper tempus vehicula sed, auctor et mi. Quisque rhoncus lacinia libero, vel sagittis sem eleifend at. Curabitur feugiat aliquet massa, vitae vehicula enim commodo at.'),
+                ],
+                mine: true,
+                footer: ContentFooter(
+                    time: DateTime.now().subtract(Duration(seconds: 65)),
+                    isRead: false),
+              ),
             ),
-          ],
-        ),
-      ),
-      floatingActionButton: new FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: new Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+            ContentWidget(
+              content: Content(
+                sourceName: 'Jorn',
+                messages: [
+                  Message(
+                      'Vestibulum blandit libero sed nisl eleifend, vitae facilisis est rhoncus. Proin ut lacus non enim sodales sagittis. Praesent ultricies maximus purus ut feugiat. Duis sit amet enim ornare, sagittis nunc non, accumsan nunc. Phasellus sit amet feugiat neque. Mauris pharetra purus sed arcu rhoncus pretium. Fusce nisi urna, luctus sed erat vel, eleifend ullamcorper sem. Aliquam magna ipsum, consequat gravida mattis sagittis, mollis a ex. Nulla facilisi. Maecenas porttitor ligula dolor, sit amet efficitur enim laoreet ut. Sed finibus eu velit quis condimentum. Pellentesque eu purus vitae nisl sollicitudin aliquet nec ac massa. Mauris id massa non tortor semper vehicula. Aenean non lobortis nisi, vitae vulputate dolor. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;'),
+                ],
+                mine: false,
+                footer: ContentFooter(time: DateTime.now(), isRead: false),
+              ),
+            ),
+          ]),
+          margin: EdgeInsets.symmetric(vertical: 10)),
     );
   }
 }
