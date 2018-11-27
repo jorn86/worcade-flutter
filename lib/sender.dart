@@ -45,4 +45,3 @@ class SenderWidget extends StatelessWidget {
     return result;
   }
 }
-

@@ -2,9 +2,21 @@ class Conversation {
   final String id;
   final String number;
   final String name;
+  final bool read;
+  final DateTime modified;
+  final Reference reporter;
+  final Reference assignee;
   final List<Content> content;
 
-  Conversation({this.id, this.number, this.name, this.content});
+  Conversation(
+      {this.id,
+      this.number,
+      this.name,
+      this.read,
+      this.modified,
+      this.reporter,
+      this.assignee,
+      this.content});
 
   @override
   String toString() => '($number $name content: $content)';
@@ -18,7 +30,8 @@ class Content {
   Content({this.messages, this.sender, this.footer});
 
   @override
-  String toString() => '(sender: $sender, messages: $messages, footer: $footer)';
+  String toString() =>
+      '(sender: $sender, messages: $messages, footer: $footer)';
 }
 
 class Message {

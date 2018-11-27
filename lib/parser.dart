@@ -26,9 +26,28 @@ List<Conversation> parseConversationList(String source) {
   var result = <Conversation>[];
   for (var value in conversations) {
     var conversation = value as Map<String, dynamic>;
-    result.add(Conversation(id: conversation['id'] as String, name: conversation['name'] as String, number: conversation['number'] as String));
+    var myLastView = _lastView(conversation);
+    var modified = _timestamp(conversation, 'modified');
+
+    result.add(Conversation(
+      id: conversation['id'] as String,
+      name: conversation['name'] as String,
+      number: conversation['number'] as String,
+      read: !modified.isAfter(myLastView),
+      modified: modified,
+      reporter: _reference(conversation['reporter']),
+      assignee: _reference(conversation['assignee']),
+    ));
   }
   return result;
+}
+
+DateTime _lastView(Map<String, dynamic> conversation) {
+  var views = conversation['views'] as List<dynamic>;
+  if (views == null || views.isEmpty) {
+    return DateTime.fromMillisecondsSinceEpoch(0);
+  }
+  return _timestamp(views[0] as Map<String, dynamic>, 'lastView');
 }
 
 Conversation parseConversation(String source) {
@@ -44,9 +63,7 @@ Conversation parseConversation(String source) {
     var userId = entry['id'] as String;
     if (isMe(userId)) continue;
 
-    var time = DateTime.fromMillisecondsSinceEpoch(
-        (entry['lastView'] as int) * 1000,
-        isUtc: true);
+    var time = _timestamp(entry, 'lastView');
 
     readBy[userId] = time;
 
@@ -58,9 +75,7 @@ Conversation parseConversation(String source) {
     if ((content['type'] as String) != 'MESSAGE') continue;
 
     var sender = _reference(content['source']);
-    var time = DateTime.fromMillisecondsSinceEpoch(
-        (content['timestamp'] as int) * 1000,
-        isUtc: true);
+    var time = _timestamp(content, 'timestamp');
 
     result.add(Content(
       messages: <Message>[Message(content['message'] as String)],
@@ -79,5 +94,10 @@ Conversation parseConversation(String source) {
 
 Reference _reference(dynamic content) {
   var c = content as Map<String, dynamic>;
-  return Reference(id: c['id'] as String, type: c['type'] as String);
+  return c == null
+      ? null
+      : Reference(id: c['id'] as String, type: c['type'] as String);
 }
+
+DateTime _timestamp(Map<String, dynamic> map, String key) =>
+    DateTime.fromMillisecondsSinceEpoch((map[key] as int) * 1000);

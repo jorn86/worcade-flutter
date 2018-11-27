@@ -18,16 +18,20 @@ class ContentWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return FractionallySizedBox(
       child: Column(children: _children()),
-      alignment: isMe(content.sender.id) ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: isMe(content.sender.id)
+          ? Alignment.centerRight
+          : Alignment.centerLeft,
       widthFactor: 0.9,
     );
   }
 
   List<Widget> _children() {
     var children = <Widget>[];
-    children.add(FutureBuilder(future: getUser(content.sender.id), builder: _buildSender));
+    children.add(FutureBuilder(
+        future: getUser(content.sender.id), builder: _buildSender));
     for (var message in content.messages) {
-      children.add(MessageWidget(message: message, mine: isMe(content.sender.id)));
+      children
+          .add(MessageWidget(message: message, mine: isMe(content.sender.id)));
     }
     children.add(ContentFooterWidget(data: content.footer));
     return children;

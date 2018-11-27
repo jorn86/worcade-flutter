@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:worcadeflutter/api.dart';
 import 'package:worcadeflutter/content.dart';
 import 'package:worcadeflutter/model.dart';
@@ -46,7 +47,7 @@ class MyHomePage extends StatelessWidget {
       var widgets = <Widget>[];
       for (var value in snapshot.data) {
         widgets.add(GestureDetector(
-          child: ListTile(title: Text('${value.number} ${value.name}')),
+          child: _buildListTile(context, value),
           onTap: () => Navigator.push(
               context,
               MaterialPageRoute<Widget>(
@@ -98,8 +99,11 @@ class MyHomePage extends StatelessWidget {
         ),
         Expanded(
           child: ListView(
+              reverse: true,
               children: snapshot.data.content
                   .map((c) => ContentWidget(content: c))
+                  .toList()
+                  .reversed
                   .toList()),
         )
       ]);
@@ -108,5 +112,85 @@ class MyHomePage extends StatelessWidget {
       throw snapshot.error;
     }
     return CircularProgressIndicator();
+  }
+
+  final _dateFormatter = DateFormat('dd MMM', 'en_US');
+  final _timeFormatter = DateFormat('HH:mm', 'en_US');
+  Widget _buildListTile(BuildContext context, Conversation value) {
+    var now = DateTime.now();
+    var midnight = DateTime(now.year, now.month, now.day);
+    var today = midnight.isBefore(value.modified);
+    return Container(
+      child: Column(children: <Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Expanded(
+                child: Text(
+              '${value.number} ${value.name}',
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                  fontWeight: value.read ? FontWeight.normal : FontWeight.bold),
+            )),
+            Text((today ? _timeFormatter : _dateFormatter)
+                .format(value.modified))
+          ],
+        ),
+        Row(
+          children: _buildListSubtitle(context, value),
+        ),
+      ]),
+      padding: EdgeInsets.all(10),
+      decoration: BoxDecoration(
+          border: Border(
+              bottom: BorderSide(color: Theme.of(context).primaryColor))),
+    );
+  }
+
+  List<Widget> _buildListSubtitle(BuildContext context, Conversation value) {
+    var result = <Widget>[];
+    if (value.reporter != null) {
+      if (value.assignee != null && value.assignee.id == value.reporter.id) {
+        result.add(FutureBuilder(
+            future: getUser(value.reporter.id),
+            builder: (context, AsyncSnapshot<Sender> snapshot) =>
+                _buildReporter(context, snapshot,
+                    [Icons.play_circle_outline, Icons.build])));
+      } else {
+        result.add(FutureBuilder(
+            future: getUser(value.reporter.id),
+            builder: (context, AsyncSnapshot<Sender> snapshot) =>
+                _buildReporter(
+                    context, snapshot, [Icons.play_circle_outline])));
+      }
+    }
+    if (value.assignee != null &&
+        (value.reporter == null || value.reporter.id != value.assignee.id)) {
+      result.add(FutureBuilder(
+          future: getUser(value.assignee.id),
+          builder: (context, AsyncSnapshot<Sender> snapshot) =>
+              _buildReporter(context, snapshot, [Icons.build])));
+    }
+    return result;
+  }
+
+  Widget _buildReporter(BuildContext context, AsyncSnapshot<Sender> snapshot,
+      List<IconData> icons) {
+    if (snapshot.hasData) {
+      var children = <Widget>[];
+      for (var value in icons) {
+        children.add(Icon(value));
+      }
+      children.add(Text(snapshot.data.name));
+      return Container(
+        child: Row(
+          children: children,
+        ),
+      );
+    }
+    if (snapshot.hasError) {
+      throw snapshot.error;
+    }
+    return Text('...');
   }
 }
