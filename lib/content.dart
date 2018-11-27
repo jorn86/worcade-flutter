@@ -3,9 +3,6 @@ import 'package:worcadeflutter/content_footer.dart';
 import 'package:worcadeflutter/message.dart';
 import 'package:worcadeflutter/sender.dart';
 
-const _left = EdgeInsets.only(left: 10, right: 50);
-const _right = EdgeInsets.only(left: 50, right: 10);
-
 class ContentWidget extends StatelessWidget {
   final Content content;
 
@@ -16,11 +13,10 @@ class ContentWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: _children(),
-      ),
-      margin: content.mine ? _right : _left,
+    return FractionallySizedBox(
+      child: Column(children: _children()),
+      alignment: content.mine ? Alignment.centerRight : Alignment.centerLeft,
+      widthFactor: 0.8,
     );
   }
 
