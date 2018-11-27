@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-
-const _mine = Color.fromARGB(255, 230, 230, 230);
-const _notMine = Color.fromARGB(255, 60, 127, 186);
+import 'package:worcadeflutter/model.dart';
 
 class MessageWidget extends StatelessWidget {
   final Message message;
@@ -15,6 +13,7 @@ class MessageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var theme = Theme.of(context);
     return Container(
       child: Column(
         children: <Widget>[
@@ -29,14 +28,8 @@ class MessageWidget extends StatelessWidget {
       padding: EdgeInsets.all(10),
       margin: EdgeInsets.symmetric(vertical: 1),
       decoration: BoxDecoration(
-          color: mine ? _mine : _notMine,
+          color: mine ? theme.primaryColorLight : theme.primaryColor,
           borderRadius: BorderRadius.all(const Radius.circular(7))),
     );
   }
-}
-
-class Message {
-  final String message;
-
-  Message(this.message);
 }

@@ -1,23 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:worcadeflutter/model.dart';
 
-class Sender extends StatelessWidget {
-  final String sourceName;
+class SenderWidget extends StatelessWidget {
+  final Sender sender;
 
-  const Sender({
+  const SenderWidget({
     Key key,
-    this.sourceName,
+    this.sender,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Row(children: _children(context));
+  }
 
-      child: Row(
-        children: <Widget>[
-          Icon(Icons.add),
-          Text(sourceName),
-        ],
-      ),
-    );
+  List<Widget> _children(BuildContext context) {
+    var style = TextStyle(color: Theme.of(context).secondaryHeaderColor);
+    var result = <Widget>[];
+    if (sender.picture != null) {
+      result.add(ClipRRect(
+        child: Image.network(
+          sender.picture,
+          width: 30,
+          height: 30,
+          fit: BoxFit.cover,
+        ),
+        borderRadius: BorderRadius.all(const Radius.circular(15)),
+      ));
+    }
+    result.add(Container(
+        child: Text(
+          sender.name,
+          style: style,
+        ),
+        margin: EdgeInsets.only(left: 5)));
+    if (sender.company != null) {
+      result.add(Container(
+          child: Text(
+            '\u00b7 ${sender.company}',
+            style: style,
+          ),
+          margin: EdgeInsets.only(left: 5)));
+    }
+    return result;
   }
 }
+

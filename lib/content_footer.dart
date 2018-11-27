@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:worcadeflutter/model.dart';
 
 final _formatter = DateFormat('dd MMM HH:mm', 'en_US');
 
@@ -22,11 +23,4 @@ class ContentFooterWidget extends StatelessWidget {
     if (data.isRead) result.add(Icon(Icons.check));
     return result;
   }
-}
-
-class ContentFooter {
-  final DateTime time;
-  final bool isRead;
-
-  ContentFooter({this.time, this.isRead});
 }
