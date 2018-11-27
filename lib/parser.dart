@@ -20,6 +20,17 @@ Sender parseUser(String source) {
   );
 }
 
+List<Conversation> parseConversationList(String source) {
+  var map = json.decode(source) as Map<String, dynamic>;
+  var conversations = map['data'] as List<dynamic>;
+  var result = <Conversation>[];
+  for (var value in conversations) {
+    var conversation = value as Map<String, dynamic>;
+    result.add(Conversation(id: conversation['id'] as String, name: conversation['name'] as String, number: conversation['number'] as String));
+  }
+  return result;
+}
+
 Conversation parseConversation(String source) {
   var map = json.decode(source) as Map<String, dynamic>;
   var conversation = map['data'] as Map<String, dynamic>;

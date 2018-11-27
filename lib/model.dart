@@ -1,9 +1,10 @@
 class Conversation {
+  final String id;
   final String number;
   final String name;
   final List<Content> content;
 
-  Conversation({this.number, this.name, this.content});
+  Conversation({this.id, this.number, this.name, this.content});
 
   @override
   String toString() => '($number $name content: $content)';

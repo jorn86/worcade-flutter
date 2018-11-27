@@ -19,6 +19,10 @@ Future<Sender> getUser(String id) => _userCache.putIfAbsent(
         .get('$api/user/$id', headers: _headers)
         .then((response) => parseUser(response.body)));
 
+Future<List<Conversation>> getConversationList() => http
+    .get('$api/conversation?limit=5&field=name&field=number&order=-modified', headers: _headers)
+    .then((response) => parseConversationList(response.body));
+
 Future<Conversation> getConversation(String id) => http
     .get('$api/conversation/$id', headers: _headers)
     .then((response) => parseConversation(response.body));

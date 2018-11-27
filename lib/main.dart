@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:worcadeflutter/api.dart';
 import 'package:worcadeflutter/content.dart';
@@ -31,36 +29,73 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text(title),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
       ),
       body: Container(
-          child: FutureBuilder(
-            future: _conversation(),
-            builder: _buildConversation,
-          ),
-          alignment: Alignment.center,
-          margin: EdgeInsets.all(10)),
+        child: FutureBuilder(
+            future: getConversationList(), builder: _buildConversationList),
+      ),
     );
+  }
+
+  Widget _buildConversationList(
+      BuildContext context, AsyncSnapshot<List<Conversation>> snapshot) {
+    if (snapshot.hasData) {
+      var widgets = <Widget>[];
+      for (var value in snapshot.data) {
+        widgets.add(GestureDetector(
+          child: ListTile(title: Text('${value.number} ${value.name}')),
+          onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute<Widget>(
+                  builder: (context) => _openConversation(value.id))),
+        ));
+      }
+      return ListView(
+        children: widgets,
+      );
+    }
+    if (snapshot.hasError) {
+      throw snapshot.error;
+    }
+    return CircularProgressIndicator();
+  }
+
+  Widget _openConversation(String id) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text(title),
+        ),
+        body: Container(
+            child: FutureBuilder(
+              future: getConversation(id),
+              builder: _buildConversation,
+            ),
+            alignment: Alignment.center,
+            margin: EdgeInsets.all(10)));
   }
 
   Widget _buildConversation(
       BuildContext context, AsyncSnapshot<Conversation> snapshot) {
     if (snapshot.hasData) {
       return Column(children: <Widget>[
-        Container(child: Row(
-          children: <Widget>[
-            Text(snapshot.data.number,
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold)),
-            Expanded(child: Text(' ${snapshot.data.name}',
-              style: TextStyle(fontSize: 18),
-              overflow: TextOverflow.ellipsis,
-            )),
-          ],
-        ),padding: EdgeInsets.only(bottom: 5),),
+        Container(
+          child: Row(
+            children: <Widget>[
+              Text(snapshot.data.number,
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Expanded(
+                  child: Text(
+                ' ${snapshot.data.name}',
+                style: TextStyle(fontSize: 18),
+                overflow: TextOverflow.ellipsis,
+              )),
+            ],
+          ),
+          padding: EdgeInsets.only(bottom: 5),
+        ),
         Expanded(
           child: ListView(
               children: snapshot.data.content
@@ -74,7 +109,4 @@ class MyHomePage extends StatelessWidget {
     }
     return CircularProgressIndicator();
   }
-
-  Future<Conversation> _conversation() =>
-      getConversation('ed0c2ace-f024-4af6-b621-7ee4e2c19c32');
 }
