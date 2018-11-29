@@ -18,12 +18,11 @@ class LoginState extends State<LoginPage> {
     if (this._formKey.currentState.validate()) {
       _formKey.currentState.save();
       loginUser(email, password).then((result) {
-        Navigator.pop(context);
-        Navigator.push(
+        return Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute<Widget>(
                 builder: (context) =>
-                    openConversationList(context, ConversationListQuery.all)));
+                    openConversationList(context, ConversationListQuery.all)), (result) => false);
       }, onError: ([Object error, StackTrace stacktrace]) {
         print('auth for $email failed with $error: $stacktrace');
         // TODO show error

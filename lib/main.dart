@@ -29,29 +29,42 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _scaffold(context, 'Worcade login', false, LoginPage());
+    return FutureBuilder(future: checkStoredApiKey(), builder: _buildFirstPage);
+  }
+
+  Widget _buildFirstPage(
+      BuildContext context, AsyncSnapshot<Reference> snapshot) {
+    if (snapshot.hasData) {
+      return openConversationList(context, ConversationListQuery.all);
+    }
+    if (snapshot.hasError) {
+      return Scaffold(
+        appBar: AppBar(title: Text('Login to Worcade')),
+        body: LoginPage(),
+      );
+    }
+    return Container(
+        child: CircularProgressIndicator(), alignment: Alignment.center);
   }
 }
 
 Widget openConversationList(BuildContext context, ConversationListQuery query) {
-  return _scaffold(
-      context,
-      'Worcade conversations',
-      true,
-      Container(
-        child: FutureBuilder(
-            future: getConversationList(query),
-            builder: _buildConversationList),
-      ));
+  return _scaffold(context, query.title,
+      body: Container(
+          child: FutureBuilder(
+              future: getConversationList(query),
+              builder: _buildConversationList),
+          alignment: Alignment.center));
 }
 
-Widget _scaffold(
-    BuildContext context, String title, bool withDrawer, Widget body) {
+Widget _scaffold(BuildContext context, String title,
+    {@required Widget body, Widget appBarButton}) {
   return Scaffold(
       appBar: AppBar(
+        leading: appBarButton, // defaults to drawer button
         title: Text(title),
       ),
-      drawer: withDrawer ? Drawer(child: _buildDrawer(context)) : null,
+      drawer: Drawer(child: _buildDrawer(context)),
       body: body);
 }
 
@@ -79,11 +92,9 @@ Widget _buildConversationList(
 }
 
 Widget _openConversation(BuildContext context, String id) {
-  return _scaffold(
-      context,
-      'Worcade chat',
-      true,
-      Container(
+  return _scaffold(context, 'Worcade chat',
+      appBarButton: BackButton(),
+      body: Container(
           child: FutureBuilder(
             future: getConversation(id),
             builder: _buildConversation,
@@ -209,12 +220,11 @@ Widget _buildDrawer(BuildContext context) {
   Future<Widget> _navigate(ConversationListQuery query) {
     // pop drawer route so 'back' goes to the previous
     // conversation or list, not the drawer
-    Navigator.pop(context);
-
-    return Navigator.push(
+    return Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute<Widget>(
-            builder: (context) => openConversationList(context, query)));
+            builder: (context) => openConversationList(context, query)),
+        (route) => false);
   }
 
   return ListView(

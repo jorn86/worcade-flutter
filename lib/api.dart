@@ -4,28 +4,48 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:worcadeflutter/model.dart';
 import 'package:worcadeflutter/parser.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 const api = 'https://dev.worcade.net/api/v2';
 
-var _loginToken = '/Jv0dGtUZMuMA3Wbj49HbvNuE6QVQWXx';
-var _myId = '0e317203-581a-4d79-b8ca-2ac16ba55364';
+String _apiKey;
+String _myId;
 
 bool isMe(String id) => id == _myId;
 
 final _userCache = <String, Future<Sender>>{};
 
 class ConversationListQuery {
+  final String title; // This does not belong here
   final String reporterId;
   final String assigneeId;
   final int limit;
 
-  ConversationListQuery({this.reporterId, this.assigneeId, this.limit = 10});
+  ConversationListQuery(this.title,
+      {this.reporterId, this.assigneeId, this.limit = 10});
 
-  static ConversationListQuery get all => ConversationListQuery();
+  static ConversationListQuery get all =>
+      ConversationListQuery('Worcade conversations');
   static ConversationListQuery get reportedByMe =>
-      ConversationListQuery(reporterId: _myId);
+      ConversationListQuery('Reported by me', reporterId: _myId);
   static ConversationListQuery get assignedToMe =>
-      ConversationListQuery(assigneeId: _myId);
+      ConversationListQuery('Assigned to me', assigneeId: _myId);
+}
+
+Future<Reference> checkStoredApiKey() async {
+  var prefs = await SharedPreferences.getInstance();
+  _apiKey = prefs.getString('apikey');
+  var response = await http
+      .get('$api/authentication', headers: _headers);
+  if (response.statusCode != 200) {
+    _apiKey = null;
+    throw 'API key no longer valid';
+  }
+  var data = (json.decode(response.body) as Map<String, dynamic>)['data']
+      as Map<String, dynamic>;
+  var me = reference(data['user']);
+  _myId = me.id;
+  return me;
 }
 
 Future<Reference> loginUser(String email, String password) {
@@ -36,9 +56,20 @@ Future<Reference> loginUser(String email, String password) {
     var body = (json.decode(response.body) as Map<String, dynamic>)['data']
         as Map<String, dynamic>;
     var subject = reference(body['authenticated']);
-    _loginToken = body['token'] as String;
     _myId = subject.id;
-    return subject;
+    return http.post('$api/user/$_myId/apikey?apiKeyDescription=MobileApp',
+        headers: <String, String>{
+          'Worcade-User': 'DIGEST ${body['token']}',
+          'Accept': 'application/json',
+        });
+  }).then((response) {
+    if (response.statusCode != 200) throw 'Creating API key failed';
+    var body = (json.decode(response.body) as Map<String, dynamic>)['data']
+        as Map<String, dynamic>;
+    _apiKey = body['apiKey'] as String;
+    return SharedPreferences.getInstance().then((prefs) {
+      prefs.setString('apikey', _apiKey);
+    });
   });
 }
 
@@ -71,6 +102,6 @@ Future<AttachmentData> getAttachmentData(String id) => http
     .then((response) => parseAttachment(response.body, api));
 
 Map<String, String> get _headers => <String, String>{
-      'Worcade-User': 'DIGEST $_loginToken',
+      'Worcade-User': 'APIKEY $_apiKey',
       'Accept': 'application/json',
     };
