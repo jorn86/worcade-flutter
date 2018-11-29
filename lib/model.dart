@@ -1,4 +1,4 @@
-import 'package:worcadeflutter/auth.dart';
+import 'package:worcadeflutter/api.dart';
 
 class Conversation {
   final String id;
@@ -50,6 +50,9 @@ class Evaluation extends Entry {
 
   Evaluation({this.rating, Reference sender, ContentFooter footer})
       : super(EntryType.evaluation, sender: sender, footer: footer);
+
+  @override
+  String toString() => '(rating: $rating)';
 }
 
 class Attachment extends Entry {

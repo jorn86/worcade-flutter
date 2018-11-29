@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:worcadeflutter/api.dart';
-import 'package:worcadeflutter/auth.dart';
 import 'package:worcadeflutter/model.dart';
 
 const _emptyMap = const <String, dynamic>{};
@@ -35,8 +34,8 @@ List<Conversation> parseConversationList(String source) {
       number: conversation['number'] as String,
       read: !modified.isAfter(myLastView),
       modified: modified,
-      reporter: _reference(conversation['reporter']),
-      assignee: _reference(conversation['assignee']),
+      reporter: reference(conversation['reporter']),
+      assignee: reference(conversation['assignee']),
     ));
   }
   return result;
@@ -46,10 +45,10 @@ AttachmentData parseAttachment(String source, String api) {
   var data = json.decode(source)['data'] as Map<String, dynamic>;
   var id = data['id'] as String;
   return AttachmentData(
-      id: id,
-      mimeType: data['mimeType'] as String,
-      name: data['name'] as String,
-      uri: '$api/attachment/$id/data',
+    id: id,
+    mimeType: data['mimeType'] as String,
+    name: data['name'] as String,
+    uri: '$api/attachment/$id/data',
   );
 }
 
@@ -79,7 +78,7 @@ Conversation parseConversation(String source) {
 
     if (lastRead.isBefore(time)) lastRead = time;
   }
-  var builder = new _ConversationBuilder(
+  var builder = _ConversationBuilder(
       number: conversation['number'] as String,
       name: conversation['name'] as String,
       lastRead: lastRead);
@@ -89,7 +88,7 @@ Conversation parseConversation(String source) {
   return builder.finish();
 }
 
-Reference _reference(dynamic content) {
+Reference reference(dynamic content) {
   var c = content as Map<String, dynamic>;
   return c == null
       ? null
@@ -106,7 +105,7 @@ class _ConversationBuilder {
 
   List<Message> messages = [];
   DateTime lastTime = DateTime.fromMillisecondsSinceEpoch(0);
-  Reference lastSender = new Reference();
+  Reference lastSender = Reference();
   List<Entry> contents = [];
 
   _ConversationBuilder({this.number, this.name, this.lastRead});
@@ -114,7 +113,7 @@ class _ConversationBuilder {
   void addContent(dynamic content) {
     var c = content as Map<String, dynamic>;
 
-    var sender = _reference(c['source']);
+    var sender = reference(c['source']);
     var time = _timestamp(c, 'timestamp');
     var type = c['type'] as String;
 
@@ -132,9 +131,9 @@ class _ConversationBuilder {
         _addEvaluation(sender, time, c['rating'] as int);
         break;
       case 'ATTACHMENT':
-        print(c);
         var data = (c['content'] as Map<String, dynamic>);
-        _addAttachment(sender, time, data['name'] as String, data['id'] as String);
+        _addAttachment(
+            sender, time, data['name'] as String, data['id'] as String);
         break;
       default:
         print(c);
@@ -144,11 +143,11 @@ class _ConversationBuilder {
   void _addMessage(Reference sender, DateTime time, String message) {
     lastSender = sender;
     lastTime = time;
-    messages.add(new Message(message));
+    messages.add(Message(message));
   }
 
   void _addEvaluation(Reference sender, DateTime time, int rating) {
-    contents.add(new Evaluation(
+    contents.add(Evaluation(
       rating: rating,
       sender: sender,
       footer: _footer(time),
@@ -156,7 +155,7 @@ class _ConversationBuilder {
   }
 
   void _addAttachment(Reference sender, DateTime time, String name, String id) {
-    contents.add(new Attachment(
+    contents.add(Attachment(
       id: id,
       name: name,
       sender: sender,
@@ -167,7 +166,7 @@ class _ConversationBuilder {
   void _reset() {
     messages = [];
     lastTime = DateTime.fromMillisecondsSinceEpoch(0);
-    lastSender = new Reference();
+    lastSender = Reference();
   }
 
   void _flush() {
@@ -188,7 +187,7 @@ class _ConversationBuilder {
 
   Conversation finish() {
     _flush();
-    return new Conversation(
+    return Conversation(
       number: number,
       name: name,
       content: contents,
