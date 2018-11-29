@@ -101,7 +101,7 @@ class MyHomePage extends StatelessWidget {
           child: ListView(
               reverse: true,
               children: snapshot.data.content
-                  .map((c) => ContentWidget(content: c))
+                  .map((c) => ContentWidget(entry: c))
                   .toList()
                   .reversed
                   .toList()),

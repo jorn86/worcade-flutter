@@ -42,6 +42,17 @@ List<Conversation> parseConversationList(String source) {
   return result;
 }
 
+AttachmentData parseAttachment(String source, String api) {
+  var data = json.decode(source)['data'] as Map<String, dynamic>;
+  var id = data['id'] as String;
+  return AttachmentData(
+      id: id,
+      mimeType: data['mimeType'] as String,
+      name: data['name'] as String,
+      uri: '$api/attachment/$id/data',
+  );
+}
+
 DateTime _lastView(Map<String, dynamic> conversation) {
   var views = conversation['views'] as List<dynamic>;
   if (views == null || views.isEmpty) {
@@ -54,7 +65,6 @@ Conversation parseConversation(String source) {
   var map = json.decode(source) as Map<String, dynamic>;
   var conversation = map['data'] as Map<String, dynamic>;
   var rawContent = conversation['content'] as List<dynamic>;
-  var result = <Content>[];
 
   var readBy = <String, DateTime>{};
   var lastRead = DateTime.fromMillisecondsSinceEpoch(0);
@@ -69,27 +79,14 @@ Conversation parseConversation(String source) {
 
     if (lastRead.isBefore(time)) lastRead = time;
   }
-
-  for (var value in rawContent) {
-    var content = value as Map<String, dynamic>;
-    if ((content['type'] as String) != 'MESSAGE') continue;
-
-    var sender = _reference(content['source']);
-    var time = _timestamp(content, 'timestamp');
-
-    result.add(Content(
-      messages: <Message>[Message(content['message'] as String)],
-      sender: sender,
-      footer: ContentFooter(
-        time: time,
-        isRead: !lastRead.isBefore(time),
-      ),
-    ));
-  }
-  return Conversation(
+  var builder = new _ConversationBuilder(
       number: conversation['number'] as String,
       name: conversation['name'] as String,
-      content: result);
+      lastRead: lastRead);
+
+  rawContent.forEach(builder.addContent);
+
+  return builder.finish();
 }
 
 Reference _reference(dynamic content) {
@@ -101,3 +98,100 @@ Reference _reference(dynamic content) {
 
 DateTime _timestamp(Map<String, dynamic> map, String key) =>
     DateTime.fromMillisecondsSinceEpoch((map[key] as int) * 1000);
+
+class _ConversationBuilder {
+  final String number;
+  final String name;
+  final DateTime lastRead;
+
+  List<Message> messages = [];
+  DateTime lastTime = DateTime.fromMillisecondsSinceEpoch(0);
+  Reference lastSender = new Reference();
+  List<Entry> contents = [];
+
+  _ConversationBuilder({this.number, this.name, this.lastRead});
+
+  void addContent(dynamic content) {
+    var c = content as Map<String, dynamic>;
+
+    var sender = _reference(c['source']);
+    var time = _timestamp(c, 'timestamp');
+    var type = c['type'] as String;
+
+    if (type != 'MESSAGE' ||
+        sender.id != lastSender.id ||
+        time.difference(lastTime).inMinutes > 3) {
+      _flush();
+    }
+
+    switch (type) {
+      case 'MESSAGE':
+        _addMessage(sender, time, c['message'] as String);
+        break;
+      case 'EVALUATION':
+        _addEvaluation(sender, time, c['rating'] as int);
+        break;
+      case 'ATTACHMENT':
+        print(c);
+        var data = (c['content'] as Map<String, dynamic>);
+        _addAttachment(sender, time, data['name'] as String, data['id'] as String);
+        break;
+      default:
+        print(c);
+    }
+  }
+
+  void _addMessage(Reference sender, DateTime time, String message) {
+    lastSender = sender;
+    lastTime = time;
+    messages.add(new Message(message));
+  }
+
+  void _addEvaluation(Reference sender, DateTime time, int rating) {
+    contents.add(new Evaluation(
+      rating: rating,
+      sender: sender,
+      footer: _footer(time),
+    ));
+  }
+
+  void _addAttachment(Reference sender, DateTime time, String name, String id) {
+    contents.add(new Attachment(
+      id: id,
+      name: name,
+      sender: sender,
+      footer: _footer(time),
+    ));
+  }
+
+  void _reset() {
+    messages = [];
+    lastTime = DateTime.fromMillisecondsSinceEpoch(0);
+    lastSender = new Reference();
+  }
+
+  void _flush() {
+    if (messages.isNotEmpty) {
+      contents.add(Content(
+        messages: messages,
+        sender: lastSender,
+        footer: _footer(lastTime),
+      ));
+      _reset();
+    }
+  }
+
+  ContentFooter _footer(DateTime time) => ContentFooter(
+        time: time,
+        isRead: !lastRead.isBefore(time),
+      );
+
+  Conversation finish() {
+    _flush();
+    return new Conversation(
+      number: number,
+      name: name,
+      content: contents,
+    );
+  }
+}

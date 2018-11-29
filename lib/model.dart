@@ -1,3 +1,5 @@
+import 'package:worcadeflutter/auth.dart';
+
 class Conversation {
   final String id;
   final String number;
@@ -6,7 +8,7 @@ class Conversation {
   final DateTime modified;
   final Reference reporter;
   final Reference assignee;
-  final List<Content> content;
+  final List<Entry> content;
 
   Conversation(
       {this.id,
@@ -22,16 +24,45 @@ class Conversation {
   String toString() => '($number $name content: $content)';
 }
 
-class Content {
+class Entry {
   final Reference sender;
-  final List<Message> messages;
   final ContentFooter footer;
+  final EntryType type;
 
-  Content({this.messages, this.sender, this.footer});
+  Entry(this.type, {this.sender, this.footer});
+
+  bool get mine => sender != null && isMe(sender.id);
+}
+
+class Content extends Entry {
+  final List<Message> messages;
+
+  Content({this.messages, Reference sender, ContentFooter footer})
+      : super(EntryType.content, sender: sender, footer: footer);
 
   @override
   String toString() =>
       '(sender: $sender, messages: $messages, footer: $footer)';
+}
+
+class Evaluation extends Entry {
+  final int rating;
+
+  Evaluation({this.rating, Reference sender, ContentFooter footer})
+      : super(EntryType.evaluation, sender: sender, footer: footer);
+}
+
+class Attachment extends Entry {
+  final String id;
+  final String name;
+  Attachment({this.id, this.name, Reference sender, ContentFooter footer})
+      : super(EntryType.attachment, sender: sender, footer: footer);
+}
+
+enum EntryType {
+  content,
+  evaluation,
+  attachment,
 }
 
 class Message {
@@ -72,4 +103,18 @@ class Reference {
 
   @override
   String toString() => '$type $id';
+}
+
+class AttachmentData {
+  final String id;
+  final String name;
+  final String uri;
+  final String mimeType;
+
+  AttachmentData({this.id, this.mimeType, this.name, this.uri});
+
+  bool get isImage => mimeType.startsWith('image/');
+
+  @override
+  String toString() => '$id $mimeType $name, $uri';
 }

@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:http/http.dart' as http;
 import 'package:worcadeflutter/auth.dart';
 import 'package:worcadeflutter/model.dart';
@@ -28,3 +27,7 @@ Future<List<Conversation>> getConversationList() => http
 Future<Conversation> getConversation(String id) => http
     .get('$api/conversation/$id', headers: _headers)
     .then((response) => parseConversation(response.body));
+
+Future<AttachmentData> getAttachmentData(String id) => http
+    .get('$api/attachment/$id', headers: _headers)
+    .then((response) => parseAttachment(response.body, api));
