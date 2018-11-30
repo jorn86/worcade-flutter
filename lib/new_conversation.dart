@@ -47,7 +47,7 @@ class NewConversationState extends State<NewConversationPage> {
               onSaved: (value) => this.name = value,
             ),
             RaisedButton(
-              onPressed: _submit,
+              onPressed: _submit, // TODO debounce
               child: Text('Start chat'),
             )
           ])),

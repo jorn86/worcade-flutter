@@ -1,8 +1,6 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:worcadeflutter/api.dart';
 import 'package:worcadeflutter/content.dart';
 import 'package:worcadeflutter/main.dart';
@@ -193,6 +191,9 @@ class ConversationInputState extends State<ConversationInput> {
   }
 
   void _upload() {
+    addAttachment(
+            conversationId, ImagePicker.pickImage(source: ImageSource.camera))
+        .then(_reload);
   }
 
   void _reload(void value) {
@@ -207,24 +208,26 @@ class ConversationInputState extends State<ConversationInput> {
   Widget build(BuildContext context) {
     return Form(
       key: _formKey,
-      child: Row(children: <Widget>[
-        IconButton(
-          icon: Icon(Icons.attach_file),
-          onPressed: _upload,
-        ),
-        // FIXME figure out how to make this take the 'rest' of the space, between buttons
-        Container(
-            width: 200,
-            child: TextFormField(
-              maxLines: 2,
-              decoration: InputDecoration(hintText: 'Type a message...'),
-              onSaved: (value) => this.text = value,
-            )),
-        IconButton(
-          icon: Icon(Icons.send),
-          onPressed: _submit,
-        ),
-      ]),
+      child: Container(
+          child: Row(children: <Widget>[
+            IconButton(
+              icon: Icon(Icons.attach_file),
+              onPressed: _upload,
+            ),
+            Flexible(
+                child: TextFormField(
+                  maxLines: 2,
+                  decoration: InputDecoration(hintText: 'Type a message...'),
+                  onSaved: (value) => this.text = value,
+                )),
+            IconButton(
+              icon: Icon(Icons.send),
+              onPressed: _submit, // TODO debounce
+            ),
+          ]),
+          decoration: BoxDecoration(
+              border: Border(
+                  top: BorderSide(color: Theme.of(context).primaryColor)))),
     );
   }
 }

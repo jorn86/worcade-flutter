@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:async/async.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:worcadeflutter/model.dart';
 import 'package:worcadeflutter/parser.dart';
@@ -22,7 +25,7 @@ class ConversationListQuery {
   final int limit;
 
   ConversationListQuery(this.title,
-      {this.reporterId, this.assigneeId, this.limit = 10});
+      {this.reporterId, this.assigneeId, this.limit = 100});
 
   static ConversationListQuery get all =>
       ConversationListQuery('Worcade conversations');
@@ -48,29 +51,32 @@ Future<Reference> checkStoredApiKey() async {
   return me;
 }
 
-Future<Reference> loginUser(String email, String password) {
-  return http.get('$api/authentication/user/email', headers: {
+Future<Reference> loginUser(String email, String password) async {
+  var tokenResponse = await http
+      .get('$api/authentication/user/email', headers: {
     'Authorization': 'BASIC ${base64.encode(utf8.encode('$email:$password'))}'
-  }).then((response) {
-    if (response.statusCode != 200) throw 'Authentication failed';
-    var body = (json.decode(response.body) as Map<String, dynamic>)['data']
-        as Map<String, dynamic>;
-    var subject = reference(body['authenticated']);
-    _myId = subject.id;
-    return http.post('$api/user/$_myId/apikey?apiKeyDescription=MobileApp',
-        headers: <String, String>{
-          'Worcade-User': 'DIGEST ${body['token']}',
-          'Accept': 'application/json',
-        });
-  }).then((response) {
-    if (response.statusCode != 200) throw 'Creating API key failed';
-    var body = (json.decode(response.body) as Map<String, dynamic>)['data']
-        as Map<String, dynamic>;
-    _apiKey = body['apiKey'] as String;
-    return SharedPreferences.getInstance().then((prefs) {
-      prefs.setString('apikey', _apiKey);
-    });
   });
+
+  if (tokenResponse.statusCode != 200) throw 'Authentication failed';
+
+  var tokenBody = parseData(tokenResponse.body) as Map<String, dynamic>;
+  _myId = reference(tokenBody['authenticated']).id;
+
+  var keyResponse = await http.post(
+      '$api/user/$_myId/apikey?apiKeyDescription=MobileApp',
+      headers: <String, String>{
+        'Worcade-User': 'DIGEST ${tokenBody['token']}',
+        'Accept': 'application/json',
+      });
+
+  if (keyResponse.statusCode != 200) throw 'Creating API key failed';
+
+  _apiKey =
+      (parseData(keyResponse.body) as Map<String, dynamic>)['apiKey'] as String;
+
+  var prefs = await SharedPreferences.getInstance();
+  prefs.setString('apikey', _apiKey);
+  return null;
 }
 
 Future<List<Conversation>> getConversationList(ConversationListQuery query) {
@@ -104,15 +110,39 @@ Future<AttachmentData> getAttachmentData(String id) => http
     .then((response) => parseAttachment(response.body, api));
 
 Future<Reference> createConversation(String name) {
-  return http.post('$api/conversation', headers: _headers, body: json.encode({'name': name, 'watchers': [{'id': _myId}]}))
+  return http
+      .post('$api/conversation',
+          headers: _headers,
+          body: json.encode({
+            'name': name,
+            'watchers': [
+              {'id': _myId}
+            ]
+          }))
       .then((response) {
-        print('got ${response.statusCode}: ${response.body}');
-        return reference(parseData(response.body));
+    print('got ${response.statusCode}: ${response.body}');
+    return reference(parseData(response.body));
   });
 }
 
 Future<void> addMessage(String conversationId, String text) {
-  return http.post('$api/conversation/$conversationId/content/message', headers: _headers, body: json.encode({'text': text}));
+  return http.post('$api/conversation/$conversationId/content/message',
+      headers: _headers, body: json.encode({'text': text}));
+}
+
+Future<void> addAttachment(String conversationId, Future<File> future) async {
+  var file = await future;
+  var request = http.MultipartRequest("POST", Uri.parse('$api/attachment'));
+  request.headers.addAll(_headers);
+  request.files.add(
+    http.MultipartFile('file',
+        new http.ByteStream(DelegatingStream.typed(file.openRead())), await file.length(),
+        filename: 'photo.jpg', contentType: MediaType('image', 'jpeg')),
+  );
+  var response = await request.send();
+  var responseBody = await response.stream.transform(utf8.decoder).join();
+  return await http.post('$api/conversation/$conversationId/content',
+      headers: _headers, body: json.encode(<Object>[parseData(responseBody)]));
 }
 
 Map<String, String> get _headers => <String, String>{
