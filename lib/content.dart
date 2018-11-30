@@ -102,9 +102,6 @@ Widget _image(BuildContext context, AttachmentData data) => _raised(
       children: <Widget>[
         Image.network(
           data.uri,
-          width: 30,
-          height: 30,
-          fit: BoxFit.scaleDown,
         )
       ],
     ),
