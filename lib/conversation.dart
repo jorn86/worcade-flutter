@@ -19,12 +19,12 @@ Widget openConversation(BuildContext context, String id) {
   return scaffold(context, 'Worcade chat',
       appBarButton: BackButton(),
       body: Container(
-          child: FutureBuilder(
-            future: getConversation(id),
-            builder: _buildConversation,
-          ),
-          alignment: Alignment.center,
-          margin: EdgeInsets.all(10)));
+        child: FutureBuilder(
+          future: getConversation(id),
+          builder: _buildConversation,
+        ),
+        alignment: Alignment.center,
+      ));
 }
 
 Widget _buildConversationList(
@@ -71,6 +71,7 @@ Widget _buildConversation(
       ),
       Expanded(
         child: ListView(
+            padding: EdgeInsets.all(10),
             reverse: true,
             children: snapshot.data.content
                 .map((c) => ContentWidget(entry: c))
@@ -216,10 +217,10 @@ class ConversationInputState extends State<ConversationInput> {
             ),
             Flexible(
                 child: TextFormField(
-                  maxLines: 2,
-                  decoration: InputDecoration(hintText: 'Type a message...'),
-                  onSaved: (value) => this.text = value,
-                )),
+              maxLines: 2,
+              decoration: InputDecoration(hintText: 'Type a message...'),
+              onSaved: (value) => this.text = value,
+            )),
             IconButton(
               icon: Icon(Icons.send),
               onPressed: _submit, // TODO debounce
