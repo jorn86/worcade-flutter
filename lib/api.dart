@@ -75,7 +75,7 @@ Future<Reference> loginUser(String email, String password) {
 
 Future<List<Conversation>> getConversationList(ConversationListQuery query) {
   var url =
-      '$api/conversation?limit=${query.limit}&field=name&field=number&field=views&field=modified&field=reporter&field=assignee&order=-modified';
+      '$api/conversation?limit=${query.limit}&field=name&field=number&field=reporter&field=assignee&field=views&field=creator&field=modified&order=-modified';
   if (query.assigneeId != null) {
     url += '&assignee=${query.assigneeId}';
   }

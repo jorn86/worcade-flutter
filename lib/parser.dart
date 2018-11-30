@@ -36,7 +36,7 @@ List<Conversation> parseConversationList(String source) {
       number: conversation['number'] as String,
       read: !modified.isAfter(myLastView),
       modified: modified,
-      reporter: reference(conversation['reporter']),
+      reporter: reference(conversation['reporter']) ?? reference(conversation['creator']),
       assignee: reference(conversation['assignee']),
     ));
   }

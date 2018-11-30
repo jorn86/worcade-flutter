@@ -14,6 +14,18 @@ Widget openConversationList(BuildContext context, ConversationListQuery query) {
           alignment: Alignment.center));
 }
 
+Widget openConversation(BuildContext context, String id) {
+  return scaffold(context, 'Worcade chat',
+      appBarButton: BackButton(),
+      body: Container(
+          child: FutureBuilder(
+            future: getConversation(id),
+            builder: _buildConversation,
+          ),
+          alignment: Alignment.center,
+          margin: EdgeInsets.all(10)));
+}
+
 Widget _buildConversationList(
     BuildContext context, AsyncSnapshot<List<Conversation>> snapshot) {
   if (snapshot.hasData) {
@@ -37,18 +49,6 @@ Widget _buildConversationList(
   return CircularProgressIndicator();
 }
 
-Widget openConversation(BuildContext context, String id) {
-  return scaffold(context, 'Worcade chat',
-      appBarButton: BackButton(),
-      body: Container(
-          child: FutureBuilder(
-            future: getConversation(id),
-            builder: _buildConversation,
-          ),
-          alignment: Alignment.center,
-          margin: EdgeInsets.all(10)));
-}
-
 Widget _buildConversation(
     BuildContext context, AsyncSnapshot<Conversation> snapshot) {
   if (snapshot.hasData) {
@@ -60,10 +60,10 @@ Widget _buildConversation(
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             Expanded(
                 child: Text(
-                  ' ${snapshot.data.name}',
-                  style: TextStyle(fontSize: 18),
-                  overflow: TextOverflow.ellipsis,
-                )),
+              ' ${snapshot.data.name}',
+              style: TextStyle(fontSize: 18),
+              overflow: TextOverflow.ellipsis,
+            )),
           ],
         ),
         padding: EdgeInsets.only(bottom: 5),
@@ -98,11 +98,11 @@ Widget _buildListTile(BuildContext context, Conversation value) {
         children: <Widget>[
           Expanded(
               child: Text(
-                '${value.number} ${value.name}',
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                    fontWeight: value.read ? FontWeight.normal : FontWeight.bold),
-              )),
+            '${value.number} ${value.name}',
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+                fontWeight: value.read ? FontWeight.normal : FontWeight.bold),
+          )),
           Text((today ? _timeFormatter : _dateFormatter).format(value.modified))
         ],
       ),
@@ -113,7 +113,7 @@ Widget _buildListTile(BuildContext context, Conversation value) {
     padding: EdgeInsets.all(10),
     decoration: BoxDecoration(
         border:
-        Border(bottom: BorderSide(color: Theme.of(context).primaryColor))),
+            Border(bottom: BorderSide(color: Theme.of(context).primaryColor))),
   );
 }
 
@@ -142,8 +142,8 @@ List<Widget> _buildListSubtitle(BuildContext context, Conversation value) {
   return result;
 }
 
-Widget _buildReporter(BuildContext context, AsyncSnapshot<User> snapshot,
-    List<IconData> icons) {
+Widget _buildReporter(
+    BuildContext context, AsyncSnapshot<User> snapshot, List<IconData> icons) {
   if (snapshot.hasData) {
     var children = <Widget>[];
     for (var value in icons) {
