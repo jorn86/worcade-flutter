@@ -1,3 +1,4 @@
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:worcadeflutter/api.dart';
@@ -43,6 +44,7 @@ Color _eventBackgroundColor(Entry entry) {
     case 'REOPEN':
       return Color.fromARGB(255, 240, 250, 252);
     case 'REMOVE_ASSIGNEE':
+    case 'REMOVE_REPORTER':
       return Color.fromARGB(255, 243, 243, 243);
     default:
       return Color.fromARGB(255, 239, 244, 247);
@@ -58,6 +60,7 @@ Color _eventColor(Entry entry) {
     case 'REOPEN':
       return Color.fromARGB(255, 0, 165, 204);
     case 'REMOVE_ASSIGNEE':
+    case 'REMOVE_REPORTER':
       return Colors.black;
     default:
       return Color.fromARGB(255, 0, 75, 114);
@@ -115,9 +118,10 @@ Widget _downloadableAttachment(BuildContext context, AttachmentData data) {
   return GestureDetector(
       onLongPress: () {
         print('Downloading ${data.name}');
+        _launchURL(data);
       },
       child: Row(children: <Widget>[
-        Icon(Icons.attachment),
+        Icon(Icons.attach_file),
         Expanded(
           child: Container(
             child: Text(data.name),
@@ -125,6 +129,15 @@ Widget _downloadableAttachment(BuildContext context, AttachmentData data) {
           ),
         ),
       ]));
+}
+
+void _launchURL(AttachmentData data) async {
+  print('Downloading ${data.name} from ${data.uri}');
+  if (await canLaunch(data.uri)) {
+    await launch(data.uri);
+  } else {
+    throw 'Could not launch ${data.uri}';
+  }
 }
 
 Widget _raised(BuildContext context, Widget child, bool roundedCorners) =>
@@ -322,11 +335,11 @@ Widget _event(BuildContext context, Entry entry) {
         mainAxisAlignment: MainAxisAlignment.center,
       );
 
-  Widget _removeAssignee(String text) => Row(
+  Widget _removed(String text, IconData icon) => Row(
         children: <Widget>[
           _circle(
             icon: Icon(
-              Icons.build,
+              icon,
               color: Colors.white,
               size: 24,
             ),
@@ -361,7 +374,10 @@ Widget _event(BuildContext context, Entry entry) {
     case 'ADD_WATCHER':
       return _subjected('was invited by ${event.sender.name}');
     case 'REMOVE_ASSIGNEE':
-      return _removeAssignee('Made unassigned by ${event.sender.name}');
+      return _removed('Made unassigned by ${event.sender.name}', Icons.build);
+    case 'REMOVE_REPORTER':
+      return _removed(
+          'Reporter removed by ${event.sender.name}', Icons.play_arrow);
     default:
       return Text('Unsupported event type ${event.eventType}');
   }
