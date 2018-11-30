@@ -63,7 +63,7 @@ DateTime _lastView(Map<String, dynamic> conversation) {
 Conversation parseConversation(String source) {
   var map = json.decode(source) as Map<String, dynamic>;
   var conversation = map['data'] as Map<String, dynamic>;
-  var rawContent = conversation['content'] as List<dynamic>;
+  var created = _timestamp(conversation, 'created');
 
   var readBy = <String, DateTime>{};
   var lastRead = DateTime.fromMillisecondsSinceEpoch(0);
@@ -81,9 +81,13 @@ Conversation parseConversation(String source) {
   var builder = _ConversationBuilder(
       number: conversation['number'] as String,
       name: conversation['name'] as String,
+      created: created,
       lastRead: lastRead);
 
+  var rawContent = conversation['content'] as List<dynamic>;
   rawContent.forEach(builder.addContent);
+  var rawEvents = conversation['events'] as List<dynamic>;
+  rawEvents.forEach(builder.addEvent);
 
   return builder.finish();
 }
@@ -92,15 +96,30 @@ Reference reference(dynamic content) {
   var c = content as Map<String, dynamic>;
   return c == null
       ? null
-      : Reference(id: c['id'] as String, type: c['type'] as String);
+      : Reference(
+          id: c['id'] as String,
+          type: c['type'] as String,
+          name: c['name'] as String,
+        );
 }
 
 DateTime _timestamp(Map<String, dynamic> map, String key) =>
     DateTime.fromMillisecondsSinceEpoch((map[key] as int) * 1000);
 
+const _supportedEventTypes = const <String>[
+  'CLOSE',
+  'REOPEN',
+  'SET_REPORTER',
+  'SET_ASSIGNEE',
+  'SET_NAME',
+  'ADD_WATCHER',
+  'REMOVE_ASSIGNEE',
+];
+
 class _ConversationBuilder {
   final String number;
   final String name;
+  final DateTime created;
   final DateTime lastRead;
 
   List<Message> messages = [];
@@ -108,7 +127,7 @@ class _ConversationBuilder {
   Reference lastSender = Reference();
   List<Entry> contents = [];
 
-  _ConversationBuilder({this.number, this.name, this.lastRead});
+  _ConversationBuilder({this.number, this.name, this.lastRead, this.created});
 
   void addContent(dynamic content) {
     var c = content as Map<String, dynamic>;
@@ -136,8 +155,39 @@ class _ConversationBuilder {
             sender, time, data['name'] as String, data['id'] as String);
         break;
       default:
-        print(c);
+        print('Unknown content type $c');
     }
+  }
+
+  void addEvent(dynamic event) {
+    _flush();
+
+    var e = event as Map<String, dynamic>;
+
+    var time = _timestamp(e, 'timestamp');
+    if (time.difference(created).inSeconds < 2) {
+      return;
+    }
+
+    var type = e['type'] as String;
+
+    if (!_supportedEventTypes.contains(type)) {
+      print('Unsupported event type $e');
+      return;
+    }
+
+    var sender = reference(e['source']);
+    var footer = _footer(time);
+    dynamic rawSubject = e['subject'];
+    var subject = rawSubject == null ? null : reference(rawSubject);
+
+    contents.add(Event(
+      sender: sender,
+      eventType: type,
+      footer: footer,
+      subject: subject,
+      name: e['name'] as String,
+    ));
   }
 
   void _addMessage(Reference sender, DateTime time, String message) {
@@ -187,6 +237,7 @@ class _ConversationBuilder {
 
   Conversation finish() {
     _flush();
+    contents.sort((a, b) => a.footer.time.compareTo(b.footer.time));
     return Conversation(
       number: number,
       name: name,

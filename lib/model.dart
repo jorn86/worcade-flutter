@@ -55,6 +55,16 @@ class Evaluation extends Entry {
   String toString() => '(rating: $rating)';
 }
 
+class Event extends Entry {
+  final Reference subject;
+  final String eventType;
+  final String name;
+
+  Event({this.eventType, Reference sender, this.subject, this.name, ContentFooter footer})
+      : super(EntryType.event, sender: sender, footer: footer);
+
+}
+
 class Attachment extends Entry {
   final String id;
   final String name;
@@ -66,6 +76,7 @@ enum EntryType {
   content,
   evaluation,
   attachment,
+  event,
 }
 
 class Message {
@@ -101,8 +112,8 @@ class ContentFooter {
 class Reference {
   final String id;
   final String type;
-
-  Reference({this.id, this.type});
+  final String name;
+  Reference({this.id, this.type, this.name});
 
   @override
   String toString() => '$type $id';
