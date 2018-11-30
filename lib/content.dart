@@ -229,7 +229,10 @@ Widget _event(BuildContext context, Entry entry) {
         decoration: BoxDecoration(
           color: fill,
           shape: BoxShape.circle,
-          border: Border.all(color: borderColor, width: borderWidth),
+          border: Border.all(
+            color: borderColor,
+            width: borderWidth,
+          ),
         ),
       );
 
@@ -307,9 +310,20 @@ Widget _event(BuildContext context, Entry entry) {
         mainAxisAlignment: MainAxisAlignment.center,
       );
 
-  Widget _subjected(String message) => Row(
+  Widget _subjected(String message, Widget overlay) => Row(
         children: <Widget>[
-          _avatar(event.subject.id),
+          Stack(
+            children: <Widget>[
+              _avatar(event.subject.id),
+              Container(
+                child: overlay,
+                padding: EdgeInsets.only(
+                  left: 25,
+                  top: 25,
+                ),
+              ),
+            ],
+          ),
           Container(
             child: Column(
               children: <Widget>[
@@ -360,19 +374,39 @@ Widget _event(BuildContext context, Entry entry) {
         mainAxisAlignment: MainAxisAlignment.center,
       );
 
+  Widget _overlay(IconData iconData, Color color) => _circle(
+        icon: Icon(
+          iconData,
+          size: 10,
+          color: _eventBackgroundColor(entry),
+        ),
+        fill: color,
+        borderWidth: 3,
+        borderColor: _eventBackgroundColor(entry),
+      );
+
   switch (event.eventType) {
     case 'CLOSE':
       return _iconed(Icons.check, 'closed the chat');
     case 'REOPEN':
       return _iconed(Icons.undo, 'reopened the chat');
     case 'SET_REPORTER':
-      return _subjected('is set as reporter by ${event.sender.name}');
+      return _subjected(
+        'is set as reporter by ${event.sender.name}',
+        _overlay(Icons.play_arrow, Colors.green),
+      );
     case 'SET_ASSIGNEE':
-      return _subjected('is assigned by ${event.sender.name}');
+      return _subjected(
+        'is assigned by ${event.sender.name}',
+        _overlay(Icons.build, color),
+      );
     case 'SET_NAME':
       return _iconed(Icons.mode_edit, 'changed the subject to\n${event.name}');
     case 'ADD_WATCHER':
-      return _subjected('was invited by ${event.sender.name}');
+      return _subjected(
+        'was invited by ${event.sender.name}',
+        _overlay(Icons.build, color),
+      );
     case 'REMOVE_ASSIGNEE':
       return _removed('Made unassigned by ${event.sender.name}', Icons.build);
     case 'REMOVE_REPORTER':
@@ -384,8 +418,7 @@ Widget _event(BuildContext context, Entry entry) {
 }
 
 _Render _headered(_Render contents) => (BuildContext context, Entry entry) {
-      Widget _buildSender(
-          BuildContext context, AsyncSnapshot<User> snapshot) {
+      Widget _buildSender(BuildContext context, AsyncSnapshot<User> snapshot) {
         if (snapshot.hasData) {
           return SenderWidget(sender: snapshot.data);
         }
