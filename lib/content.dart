@@ -221,7 +221,7 @@ Widget _event(BuildContext context, Entry entry) {
       );
 
   Widget _avatar(String id) {
-    Widget _generate(Sender sender) {
+    Widget _generate(User sender) {
       if (sender.picture != null) {
         return ClipRRect(
           child: Image.network(
@@ -246,7 +246,7 @@ Widget _event(BuildContext context, Entry entry) {
       );
     }
 
-    Widget _build(BuildContext context, AsyncSnapshot<Sender> snapshot) {
+    Widget _build(BuildContext context, AsyncSnapshot<User> snapshot) {
       if (snapshot.hasData) {
         return _generate(snapshot.data);
       }
@@ -256,7 +256,7 @@ Widget _event(BuildContext context, Entry entry) {
       return Text('...');
     }
 
-    return FutureBuilder<Sender>(
+    return FutureBuilder<User>(
       future: getUser(id),
       builder: _build,
     );
@@ -369,7 +369,7 @@ Widget _event(BuildContext context, Entry entry) {
 
 _Render _headered(_Render contents) => (BuildContext context, Entry entry) {
       Widget _buildSender(
-          BuildContext context, AsyncSnapshot<Sender> snapshot) {
+          BuildContext context, AsyncSnapshot<User> snapshot) {
         if (snapshot.hasData) {
           return SenderWidget(sender: snapshot.data);
         }

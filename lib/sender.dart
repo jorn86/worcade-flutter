@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:worcadeflutter/model.dart';
 
 class SenderWidget extends StatelessWidget {
-  final Sender sender;
+  final User sender;
 
   const SenderWidget({
     Key key,

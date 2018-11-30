@@ -88,12 +88,12 @@ class Message {
   String toString() => message;
 }
 
-class Sender {
+class User {
   final String name;
   final String company;
   final String picture;
 
-  Sender({this.name, this.company, this.picture});
+  User({this.name, this.company, this.picture});
 
   @override
   String toString() => '$name \u00b7 $company; pic: ${picture != null}';

@@ -5,13 +5,16 @@ import 'package:worcadeflutter/model.dart';
 
 const _emptyMap = const <String, dynamic>{};
 
-Sender parseUser(String source) {
-  var map = json.decode(source) as Map<String, dynamic>;
-  var user = map['data'] as Map<String, dynamic>;
+dynamic parseData(String source) {
+  return (json.decode(source) as Map<String, dynamic>)['data'];
+}
+
+User parseUser(String source) {
+  Map<String, dynamic> user = parseData(source) as Map<String, dynamic>;
   var pictureId =
       (user['picture'] as Map<String, dynamic> ?? _emptyMap)['id'] as String;
 
-  return Sender(
+  return User(
     name: user['name'] as String,
     company: (user['company'] as Map<String, dynamic> ?? _emptyMap)['name']
         as String,
@@ -20,8 +23,7 @@ Sender parseUser(String source) {
 }
 
 List<Conversation> parseConversationList(String source) {
-  var map = json.decode(source) as Map<String, dynamic>;
-  var conversations = map['data'] as List<dynamic>;
+  var conversations = parseData(source) as List<dynamic>;
   var result = <Conversation>[];
   for (var value in conversations) {
     var conversation = value as Map<String, dynamic>;
@@ -42,7 +44,7 @@ List<Conversation> parseConversationList(String source) {
 }
 
 AttachmentData parseAttachment(String source, String api) {
-  var data = json.decode(source)['data'] as Map<String, dynamic>;
+  var data = parseData(source) as Map<String, dynamic>;
   var id = data['id'] as String;
   return AttachmentData(
     id: id,

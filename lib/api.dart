@@ -13,7 +13,7 @@ String _myId;
 
 bool isMe(String id) => id == _myId;
 
-final _userCache = <String, Future<Sender>>{};
+final _userCache = <String, Future<User>>{};
 
 class ConversationListQuery {
   final String title; // This does not belong here
@@ -35,8 +35,8 @@ class ConversationListQuery {
 Future<Reference> checkStoredApiKey() async {
   var prefs = await SharedPreferences.getInstance();
   _apiKey = prefs.getString('apikey');
-  var response = await http
-      .get('$api/authentication', headers: _headers);
+  if (_apiKey == null) throw 'API key not available';
+  var response = await http.get('$api/authentication', headers: _headers);
   if (response.statusCode != 200) {
     _apiKey = null;
     throw 'API key no longer valid';
@@ -91,7 +91,9 @@ Future<Conversation> getConversation(String id) => http
     .get('$api/conversation/$id', headers: _headers)
     .then((response) => parseConversation(response.body));
 
-Future<Sender> getUser(String id) => _userCache.putIfAbsent(
+Future<User> getMyUser() => getUser(_myId);
+
+Future<User> getUser(String id) => _userCache.putIfAbsent(
     id,
     () => http
         .get('$api/user/$id', headers: _headers)
