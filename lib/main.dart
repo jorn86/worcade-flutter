@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:worcadeflutter/api.dart';
 import 'package:worcadeflutter/conversation.dart';
+import 'package:worcadeflutter/new_conversation.dart';
 import 'package:worcadeflutter/login.dart';
 import 'package:worcadeflutter/model.dart';
 
@@ -74,6 +75,12 @@ Widget _buildDrawer(BuildContext context) {
     children: <Widget>[
       FutureBuilder(future: getMyUser(), builder: _buildUserProfile),
       ListTile(
+        leading: Icon(Icons.add),
+        title: Text('Start new chat'),
+        onTap: () => Navigator.push(
+            context, MaterialPageRoute<Widget>(builder: openNewConversation)),
+      ),
+      ListTile(
         leading: Icon(Icons.chat),
         title: Text('All conversations'),
         onTap: () => _navigate(ConversationListQuery.all),
@@ -96,7 +103,8 @@ Widget _buildUserProfile(BuildContext context, AsyncSnapshot<User> snapshot) {
   if (snapshot.hasData) {
     return ListTile(
       leading: ClipRRect(
-        child: Image.network(snapshot.data.picture,
+        child: Image.network(
+          snapshot.data.picture,
           width: 30,
           height: 30,
           fit: BoxFit.cover,

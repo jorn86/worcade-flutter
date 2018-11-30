@@ -24,7 +24,7 @@ Widget _buildConversationList(
         onTap: () => Navigator.push(
             context,
             MaterialPageRoute<Widget>(
-                builder: (context) => _openConversation(context, value.id))),
+                builder: (context) => openConversation(context, value.id))),
       ));
     }
     return ListView(
@@ -37,7 +37,7 @@ Widget _buildConversationList(
   return CircularProgressIndicator();
 }
 
-Widget _openConversation(BuildContext context, String id) {
+Widget openConversation(BuildContext context, String id) {
   return scaffold(context, 'Worcade chat',
       appBarButton: BackButton(),
       body: Container(

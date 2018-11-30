@@ -22,7 +22,8 @@ class LoginState extends State<LoginPage> {
             context,
             MaterialPageRoute<Widget>(
                 builder: (context) =>
-                    openConversationList(context, ConversationListQuery.all)), (result) => false);
+                    openConversationList(context, ConversationListQuery.all)),
+            (result) => false);
       }, onError: ([Object error, StackTrace stacktrace]) {
         print('auth for $email failed with $error: $stacktrace');
         // TODO show error
@@ -44,9 +45,7 @@ class LoginState extends State<LoginPage> {
                   autofocus: true,
                   decoration: InputDecoration(
                       hintText: 'you@company.com', labelText: 'E-mail address'),
-                  onSaved: (value) {
-                    this.email = value;
-                  },
+                  onSaved: (value) => this.email = value,
                 ),
                 TextFormField(
                   controller: TextEditingController(text: this.password),
@@ -54,12 +53,10 @@ class LoginState extends State<LoginPage> {
                       hintText: 'Password', labelText: 'Password'),
                   obscureText: true,
                   autocorrect: false,
-                  onSaved: (value) {
-                    this.password = value;
-                  },
+                  onSaved: (value) => this.password = value,
                 ),
                 RaisedButton(
-                  onPressed: () => _submit(),
+                  onPressed: _submit,
                   child: Text('Log in'),
                 )
               ],

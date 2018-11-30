@@ -103,7 +103,16 @@ Future<AttachmentData> getAttachmentData(String id) => http
     .get('$api/attachment/$id', headers: _headers)
     .then((response) => parseAttachment(response.body, api));
 
+Future<Reference> createConversation(String name) {
+  return http.post('$api/conversation', headers: _headers, body: json.encode({'name': name, 'watchers': [{'id': _myId}]}))
+      .then((response) {
+        print('got ${response.statusCode}: ${response.body}');
+        return reference(parseData(response.body));
+  });
+}
+
 Map<String, String> get _headers => <String, String>{
       'Worcade-User': 'APIKEY $_apiKey',
       'Accept': 'application/json',
+      'Content-Type': 'application/json',
     };
