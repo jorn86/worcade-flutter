@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:worcadeflutter/model.dart';
 import 'package:worcadeflutter/parser.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 const api = 'https://dev.worcade.net/api/v2';
 
@@ -109,6 +109,10 @@ Future<Reference> createConversation(String name) {
         print('got ${response.statusCode}: ${response.body}');
         return reference(parseData(response.body));
   });
+}
+
+Future<void> addMessage(String conversationId, String text) {
+  return http.post('$api/conversation/$conversationId/content/message', headers: _headers, body: json.encode({'text': text}));
 }
 
 Map<String, String> get _headers => <String, String>{

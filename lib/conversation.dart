@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:worcadeflutter/api.dart';
 import 'package:worcadeflutter/content.dart';
 import 'package:worcadeflutter/main.dart';
@@ -76,7 +79,8 @@ Widget _buildConversation(
                 .toList()
                 .reversed
                 .toList()),
-      )
+      ),
+      ConversationInput(conversationId: snapshot.data.id)
     ]);
   }
   if (snapshot.hasError) {
@@ -160,4 +164,67 @@ Widget _buildReporter(
     throw snapshot.error;
   }
   return Text('...');
+}
+
+class ConversationInput extends StatefulWidget {
+  final String conversationId;
+
+  const ConversationInput({Key key, this.conversationId}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() {
+    return ConversationInputState(conversationId);
+  }
+}
+
+class ConversationInputState extends State<ConversationInput> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final String conversationId;
+  String text;
+
+  ConversationInputState(this.conversationId);
+
+  void _submit() {
+    if (this._formKey.currentState.validate()) {
+      _formKey.currentState.save();
+
+      addMessage(conversationId, text).then(_reload);
+    }
+  }
+
+  void _upload() {
+  }
+
+  void _reload(void value) {
+    // FIXME reload data instead of reopening page
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute<Widget>(
+            builder: (context) => openConversation(context, conversationId)));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: Row(children: <Widget>[
+        IconButton(
+          icon: Icon(Icons.attach_file),
+          onPressed: _upload,
+        ),
+        // FIXME figure out how to make this take the 'rest' of the space, between buttons
+        Container(
+            width: 200,
+            child: TextFormField(
+              maxLines: 2,
+              decoration: InputDecoration(hintText: 'Type a message...'),
+              onSaved: (value) => this.text = value,
+            )),
+        IconButton(
+          icon: Icon(Icons.send),
+          onPressed: _submit,
+        ),
+      ]),
+    );
+  }
 }

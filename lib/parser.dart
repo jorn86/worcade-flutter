@@ -81,6 +81,7 @@ Conversation parseConversation(String source) {
     if (lastRead.isBefore(time)) lastRead = time;
   }
   var builder = _ConversationBuilder(
+      id: conversation['id'] as String,
       number: conversation['number'] as String,
       name: conversation['name'] as String,
       created: created,
@@ -120,6 +121,7 @@ const _supportedEventTypes = const <String>[
 ];
 
 class _ConversationBuilder {
+  final String id;
   final String number;
   final String name;
   final DateTime created;
@@ -130,7 +132,7 @@ class _ConversationBuilder {
   Reference lastSender = Reference();
   List<Entry> contents = [];
 
-  _ConversationBuilder({this.number, this.name, this.lastRead, this.created});
+  _ConversationBuilder({this.id, this.number, this.name, this.lastRead, this.created});
 
   void addContent(dynamic content) {
     var c = content as Map<String, dynamic>;
@@ -242,6 +244,7 @@ class _ConversationBuilder {
     _flush();
     contents.sort((a, b) => a.footer.time.compareTo(b.footer.time));
     return Conversation(
+      id: id,
       number: number,
       name: name,
       content: contents,
