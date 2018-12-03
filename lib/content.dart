@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -175,11 +177,57 @@ const _ratingText = [
   'Excelent!'
 ];
 
+/*
+Row(
+  children: [
+    Stack(
+      children: <Widget>[
+        Container(
+          child: Icon(
+            Icons.star,
+            color: Colors.grey,
+          ),
+          margin: EdgeInsets.only(top: 1.0),
+        ),
+        BackdropFilter(
+          child: Icon(
+            Icons.star,
+            color: Color.fromARGB(255, 252, 228, 84),
+          ),
+          filter: ImageFilter.blur(sigmaY: 0.5, sigmaX: 0.5),
+        ),
+      ],
+    ),
+    Icon(Icons.star_border, color: Colors.grey,),
+  ],
+  mainAxisAlignment: MainAxisAlignment.center,
+),
+
+ */
+
 Widget _rating(BuildContext context, int rating) {
   var stars = <Widget>[];
   for (var i = 0; i < 5; i++) {
     if (i + 1 <= rating) {
-      stars.add(Icon(Icons.star, color: Colors.yellow));
+      stars.add(    Stack(
+        children: <Widget>[
+          Container(
+            child: Icon(
+              Icons.star,
+              color: Colors.grey,
+            ),
+            margin: EdgeInsets.only(top: 1.0),
+          ),
+          BackdropFilter(
+            child: Icon(
+              Icons.star,
+              color: Color.fromARGB(255, 252, 228, 84),
+            ),
+            filter: ImageFilter.blur(sigmaY: 0.5, sigmaX: 0.5),
+          ),
+        ],
+      ),
+      );
     } else {
       stars.add(Icon(Icons.star_border, color: Colors.grey));
     }
