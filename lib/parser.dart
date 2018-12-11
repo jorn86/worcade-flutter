@@ -118,6 +118,7 @@ const _supportedEventTypes = const <String>[
   'ADD_WATCHER',
   'REMOVE_ASSIGNEE',
   'REMOVE_REPORTER',
+  'REMOVE_WATCHER',
 ];
 
 class _ConversationBuilder {

@@ -41,12 +41,14 @@ Color _eventBackgroundColor(Entry entry) {
   var e = entry as Event;
   switch (e.eventType) {
     case 'CLOSE':
+    case 'ADD_WATCHER':
       return Color.fromARGB(255, 240, 251, 247);
     case 'SET_NAME':
     case 'REOPEN':
       return Color.fromARGB(255, 240, 250, 252);
     case 'REMOVE_ASSIGNEE':
     case 'REMOVE_REPORTER':
+    case 'REMOVE_WATCHER':
       return Color.fromARGB(255, 243, 243, 243);
     default:
       return Color.fromARGB(255, 239, 244, 247);
@@ -61,8 +63,11 @@ Color _eventColor(Entry entry) {
     case 'SET_NAME':
     case 'REOPEN':
       return Color.fromARGB(255, 0, 165, 204);
+    case 'ADD_WATCHER':
+      return Color.fromARGB(255, 0, 181, 112);
     case 'REMOVE_ASSIGNEE':
     case 'REMOVE_REPORTER':
+    case 'REMOVE_WATCHER':
       return Colors.black;
     default:
       return Color.fromARGB(255, 0, 75, 114);
@@ -104,6 +109,7 @@ Widget _image(BuildContext context, AttachmentData data) => _raised(
       children: <Widget>[
         Image.network(
           data.uri,
+          fit: BoxFit.cover,
         )
       ],
     ),
@@ -177,56 +183,29 @@ const _ratingText = [
   'Excelent!'
 ];
 
-/*
-Row(
-  children: [
-    Stack(
-      children: <Widget>[
-        Container(
-          child: Icon(
-            Icons.star,
-            color: Colors.grey,
-          ),
-          margin: EdgeInsets.only(top: 1.0),
-        ),
-        BackdropFilter(
-          child: Icon(
-            Icons.star,
-            color: Color.fromARGB(255, 252, 228, 84),
-          ),
-          filter: ImageFilter.blur(sigmaY: 0.5, sigmaX: 0.5),
-        ),
-      ],
-    ),
-    Icon(Icons.star_border, color: Colors.grey,),
-  ],
-  mainAxisAlignment: MainAxisAlignment.center,
-),
-
- */
-
 Widget _rating(BuildContext context, int rating) {
   var stars = <Widget>[];
   for (var i = 0; i < 5; i++) {
     if (i + 1 <= rating) {
-      stars.add(    Stack(
-        children: <Widget>[
-          Container(
-            child: Icon(
-              Icons.star,
-              color: Colors.grey,
+      stars.add(
+        Stack(
+          children: <Widget>[
+            Container(
+              child: Icon(
+                Icons.star,
+                color: Colors.grey,
+              ),
+              margin: EdgeInsets.only(top: 1.0),
             ),
-            margin: EdgeInsets.only(top: 1.0),
-          ),
-          BackdropFilter(
-            child: Icon(
-              Icons.star,
-              color: Color.fromARGB(255, 252, 228, 84),
+            BackdropFilter(
+              child: Icon(
+                Icons.star,
+                color: Color.fromARGB(255, 252, 228, 84),
+              ),
+              filter: ImageFilter.blur(sigmaY: 0.5, sigmaX: 0.5),
             ),
-            filter: ImageFilter.blur(sigmaY: 0.5, sigmaX: 0.5),
-          ),
-        ],
-      ),
+          ],
+        ),
       );
     } else {
       stars.add(Icon(Icons.star_border, color: Colors.grey));
@@ -450,13 +429,16 @@ Widget _event(BuildContext context, Entry entry) {
     case 'ADD_WATCHER':
       return _subjected(
         'was invited by ${event.sender.name}',
-        _overlay(Icons.build, color),
+        _overlay(Icons.person_add, color),
       );
     case 'REMOVE_ASSIGNEE':
       return _removed('Made unassigned by ${event.sender.name}', Icons.build);
     case 'REMOVE_REPORTER':
       return _removed(
           'Reporter removed by ${event.sender.name}', Icons.play_arrow);
+    case 'REMOVE_WATCHER':
+      return _removed(
+          '${event.sender.name} left the chat', Icons.directions_run);
     default:
       return Text('Unsupported event type ${event.eventType}');
   }
