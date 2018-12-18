@@ -41,6 +41,9 @@ class MyHomePage extends StatelessWidget {
   Widget _buildFirstPage(
       BuildContext context, AsyncSnapshot<Reference> snapshot) {
     if (snapshot.hasData) {
+      firebaseMessaging.getToken().then((String token) {
+        print('Token $token');
+      });
       return openConversationList(context, ConversationListQuery.all);
     }
     if (snapshot.hasError) {
