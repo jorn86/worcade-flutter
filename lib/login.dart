@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:worcadeflutter/api.dart';
 import 'package:worcadeflutter/conversation.dart';
+import 'package:worcadeflutter/main.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -18,6 +19,9 @@ class LoginState extends State<LoginPage> {
     if (this._formKey.currentState.validate()) {
       _formKey.currentState.save();
       loginUser(email, password).then((result) {
+        firebaseMessaging.getToken().then((String token) {
+          print('Token $token');
+        });
         return Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute<Widget>(

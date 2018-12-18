@@ -4,8 +4,14 @@ import 'package:worcadeflutter/conversation.dart';
 import 'package:worcadeflutter/new_conversation.dart';
 import 'package:worcadeflutter/login.dart';
 import 'package:worcadeflutter/model.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
-void main() => runApp(MyApp());
+final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
+
+void main() {
+  firebaseMessaging.requestNotificationPermissions();
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
