@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "315879835086",
+    "firebase_url": "https://api-project-315879835086.firebaseio.com",
+    "project_id": "api-project-315879835086",
+    "storage_bucket": "api-project-315879835086.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:315879835086:android:7502e741df38529f",
+        "android_client_info": {
+          "package_name": "net.worcade.worcadeflutter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "315879835086-4i4e7mk5a25aejg4en5v3mr958ogn4a9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdGln-fB31lLRnk5diJaM6vtT0siEgroQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
