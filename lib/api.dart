@@ -6,6 +6,7 @@ import 'package:async/async.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:worcadeflutter/main.dart';
 import 'package:worcadeflutter/model.dart';
 import 'package:worcadeflutter/parser.dart';
 
@@ -48,11 +49,12 @@ Future<Reference> checkStoredApiKey() async {
       as Map<String, dynamic>;
   var me = reference(data['user']);
   _myId = me.id;
+  sendNotificationToken(await firebaseMessaging.getToken());
   return me;
 }
 
 Future<void> sendNotificationToken(String token) async {
-  http.post('$api/user/$_myId/firebaseToken', headers: _headers, body: json.encode({'token': token})).then((v) => print(v.statusCode));
+  http.post('$api/user/$_myId/firebaseToken', headers: _headers, body: json.encode({'token': token}));
 }
 
 Future<Reference> loginUser(String email, String password) async {
@@ -127,6 +129,11 @@ Future<Reference> createConversation(String name) {
     print('got ${response.statusCode}: ${response.body}');
     return reference(parseData(response.body));
   });
+}
+
+Future<void> view(String conversationId) {
+  return http.post('$api/conversation/$conversationId/view',
+      headers: _headers);
 }
 
 Future<void> addMessage(String conversationId, String text) {

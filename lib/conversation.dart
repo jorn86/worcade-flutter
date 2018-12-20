@@ -53,6 +53,7 @@ Widget _buildConversationList(
 Widget _buildConversation(
     BuildContext context, AsyncSnapshot<Conversation> snapshot) {
   if (snapshot.hasData) {
+    view(snapshot.data.id);
     return Column(children: <Widget>[
       Container(
         child: Row(
