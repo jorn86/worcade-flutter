@@ -54,6 +54,7 @@ class MyHomePage extends StatelessWidget {
       );
       firebaseMessaging.getToken().then((String token) {
         print('Token $token');
+        sendNotificationToken(token);
       });
       return openConversationList(context, ConversationListQuery.all);
     }

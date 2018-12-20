@@ -51,6 +51,10 @@ Future<Reference> checkStoredApiKey() async {
   return me;
 }
 
+Future<void> sendNotificationToken(String token) async {
+  http.post('$api/user/$_myId/firebaseToken', headers: _headers, body: json.encode({'token': token})).then((v) => print(v.statusCode));
+}
+
 Future<Reference> loginUser(String email, String password) async {
   var tokenResponse = await http
       .get('$api/authentication/user/email', headers: {
