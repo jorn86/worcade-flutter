@@ -10,17 +10,6 @@ final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
 
 void main() async {
   firebaseMessaging.requestNotificationPermissions();
-  firebaseMessaging.configure(
-    onMessage: (Map<String, dynamic> message) async {
-      print("onMessage: $message");
-    },
-    onLaunch: (Map<String, dynamic> message) async {
-      print("onLaunch: $message");
-    },
-    onResume: (Map<String, dynamic> message) async {
-      print("onResume: $message");
-    },
-  );
   runApp(MyApp());
 }
 
@@ -46,6 +35,28 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        var id = (message['data'] as Map<dynamic, dynamic>)['conversationId']
+            as String;
+        var contentWidget = ConversationContent.latest;
+        if (contentWidget != null && contentWidget.conversationId == id) {
+          contentWidget.reload();
+        } else {
+          // TODO show a notification instead of just opening the convo
+          Navigator.push(
+              context,
+              MaterialPageRoute<Widget>(
+                  builder: (context) => openConversation(context, id)));
+        }
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print("onLaunch: $message");
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print("onResume: $message");
+      },
+    );
     return FutureBuilder(future: checkStoredApiKey(), builder: _buildFirstPage);
   }
 

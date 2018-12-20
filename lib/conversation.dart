@@ -55,31 +55,7 @@ Widget _buildConversation(
   if (snapshot.hasData) {
     view(snapshot.data.id);
     return Column(children: <Widget>[
-      Container(
-        child: Row(
-          children: <Widget>[
-            Text(snapshot.data.number,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            Expanded(
-                child: Text(
-              ' ${snapshot.data.name}',
-              style: TextStyle(fontSize: 18),
-              overflow: TextOverflow.ellipsis,
-            )),
-          ],
-        ),
-        padding: EdgeInsets.only(bottom: 5),
-      ),
-      Expanded(
-        child: ListView(
-            padding: EdgeInsets.all(10),
-            reverse: true,
-            children: snapshot.data.content
-                .map((c) => ContentWidget(entry: c))
-                .toList()
-                .reversed
-                .toList()),
-      ),
+      ConversationContent(data: snapshot.data),
       ConversationInput(conversationId: snapshot.data.id)
     ]);
   }
@@ -166,15 +142,77 @@ Widget _buildReporter(
   return Text('...');
 }
 
+class ConversationContent extends StatefulWidget {
+  static ConversationContentState latest;
+
+  final Conversation data;
+
+  const ConversationContent({Key key, this.data}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() {
+    return latest = ConversationContentState(data);
+  }
+}
+
+class ConversationContentState extends State<ConversationContent> {
+  Conversation conversation;
+
+  ConversationContentState(this.conversation);
+
+  String get conversationId => conversation.id;
+
+  void reload() {
+    getConversation(conversationId)
+        .then((conversation) => update(conversation));
+  }
+
+  void update(Conversation conversation) {
+    setState(() {
+      this.conversation = conversation;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+        child: Column(children: <Widget>[
+      Container(
+        child: Row(
+          children: <Widget>[
+            Text(conversation.number,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Expanded(
+                child: Text(
+              ' ${conversation.name}',
+              style: TextStyle(fontSize: 18),
+              overflow: TextOverflow.ellipsis,
+            )),
+          ],
+        ),
+        padding: EdgeInsets.only(bottom: 5),
+      ),
+      Expanded(
+        child: ListView(
+            padding: EdgeInsets.all(10),
+            reverse: true,
+            children: conversation.content
+                .map((c) => ContentWidget(entry: c))
+                .toList()
+                .reversed
+                .toList()),
+      )
+    ]));
+  }
+}
+
 class ConversationInput extends StatefulWidget {
   final String conversationId;
 
   const ConversationInput({Key key, this.conversationId}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() {
-    return ConversationInputState(conversationId);
-  }
+  State<StatefulWidget> createState() => ConversationInputState(conversationId);
 }
 
 class ConversationInputState extends State<ConversationInput> {
@@ -187,8 +225,8 @@ class ConversationInputState extends State<ConversationInput> {
   void _submit() {
     if (this._formKey.currentState.validate()) {
       _formKey.currentState.save();
-
       addMessage(conversationId, text).then(_reload);
+      _formKey.currentState.reset();
     }
   }
 
@@ -199,11 +237,7 @@ class ConversationInputState extends State<ConversationInput> {
   }
 
   void _reload(void value) {
-    // FIXME reload data instead of reopening page
-    Navigator.pushReplacement(
-        context,
-        MaterialPageRoute<Widget>(
-            builder: (context) => openConversation(context, conversationId)));
+    ConversationContent.latest.reload();
   }
 
   @override
