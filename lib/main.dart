@@ -1,4 +1,3 @@
-import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:worcadeflutter/api.dart';
 import 'package:worcadeflutter/conversation.dart';
@@ -6,7 +5,6 @@ import 'package:worcadeflutter/new_conversation.dart';
 import 'package:worcadeflutter/login.dart';
 import 'package:worcadeflutter/model.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:device_info/device_info.dart';
 
 final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
 
@@ -23,23 +21,7 @@ void main() async {
       print("onResume: $message");
     },
   );
-  var name = await _deviceName();
-  print('Device name: $name');
   runApp(MyApp());
-}
-
-Future<String> _deviceName() async {
-  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-
-  if (Platform.isIOS) {
-    IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-    return iosInfo.utsname.machine;
-  }
-  if (Platform.isAndroid) {
-    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-    return androidInfo.model;
-  }
-  return '<unknown device>';
 }
 
 class MyApp extends StatelessWidget {

@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:worcadeflutter/main.dart';
 import 'package:worcadeflutter/model.dart';
 import 'package:worcadeflutter/parser.dart';
+import 'package:worcadeflutter/device.dart';
 
 const api = 'https://dev.worcade.net/api/v2';
 
@@ -49,12 +50,12 @@ Future<Reference> checkStoredApiKey() async {
       as Map<String, dynamic>;
   var me = reference(data['user']);
   _myId = me.id;
-  sendNotificationToken(await firebaseMessaging.getToken());
+  sendNotificationToken(await firebaseMessaging.getToken(), await deviceName());
   return me;
 }
 
-Future<void> sendNotificationToken(String token) async {
-  http.post('$api/user/$_myId/firebaseToken', headers: _headers, body: json.encode({'token': token}));
+Future<void> sendNotificationToken(String token, String name) async {
+  http.post('$api/user/$_myId/firebaseToken', headers: _headers, body: json.encode({'token': token, 'name': name}));
 }
 
 Future<Reference> loginUser(String email, String password) async {
