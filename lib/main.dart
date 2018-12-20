@@ -41,6 +41,17 @@ class MyHomePage extends StatelessWidget {
   Widget _buildFirstPage(
       BuildContext context, AsyncSnapshot<Reference> snapshot) {
     if (snapshot.hasData) {
+      firebaseMessaging.configure(
+          onMessage: (Map<String, dynamic> message) async {
+            print("onMessage: $message");
+          },
+          onLaunch: (Map<String, dynamic> message) async {
+            print("onLaunch: $message");
+          },
+          onResume: (Map<String, dynamic> message) async {
+            print("onResume: $message");
+          },
+      );
       firebaseMessaging.getToken().then((String token) {
         print('Token $token');
       });
