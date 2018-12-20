@@ -26,6 +26,7 @@ dependencies:
   shared_preferences: ^0.4.3
   url_launcher: ^4.0.2
   firebase_messaging: ^2.1.0
+  device_info: ^0.3.0
 
 dev_dependencies:
   flutter_test:
