@@ -18,15 +18,7 @@ class SenderWidget extends StatelessWidget {
     var style = TextStyle(color: Theme.of(context).secondaryHeaderColor);
     var result = <Widget>[];
     if (sender.picture != null) {
-      result.add(ClipRRect(
-        child: Image.network(
-          sender.picture,
-          width: 30,
-          height: 30,
-          fit: BoxFit.cover,
-        ),
-        borderRadius: BorderRadius.all(const Radius.circular(15)),
-      ));
+      result.add(profilePicture(sender.picture, 30));
     }
     result.add(Container(
         child: Text(
@@ -44,4 +36,16 @@ class SenderWidget extends StatelessWidget {
     }
     return result;
   }
+}
+
+Widget profilePicture(String url, double size) {
+  Widget child = url == null
+      ? Icon(Icons.person)
+      : Image.network(
+          url,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+        );
+  return ClipRRect(child: child, borderRadius: BorderRadius.circular(size / 2));
 }

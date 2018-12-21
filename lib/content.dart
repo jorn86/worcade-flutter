@@ -261,34 +261,9 @@ Widget _event(BuildContext context, Entry entry) {
       );
 
   Widget _avatar(String id) {
-    Widget _generate(User sender) {
-      if (sender.picture != null) {
-        return ClipRRect(
-          child: Image.network(
-            sender.picture,
-            width: 40,
-            height: 40,
-            fit: BoxFit.cover,
-          ),
-          borderRadius: BorderRadius.all(const Radius.circular(20)),
-        );
-      }
-      return Container(
-        child: Text(
-          sender.name.substring(0, 1).toUpperCase(),
-          style: TextStyle(color: Colors.white, fontSize: 14),
-        ),
-        padding: EdgeInsets.all(15),
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-        ),
-      );
-    }
-
     Widget _build(BuildContext context, AsyncSnapshot<User> snapshot) {
       if (snapshot.hasData) {
-        return _generate(snapshot.data);
+        return profilePicture(snapshot.data.picture, 40);
       }
       if (snapshot.hasError) {
         throw snapshot.error;
