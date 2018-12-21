@@ -204,6 +204,12 @@ class ConversationContentState extends State<ConversationContent> {
       )
     ]));
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+    ConversationContent.latest = null;
+  }
 }
 
 class ConversationInput extends StatefulWidget {
