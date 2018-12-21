@@ -3,13 +3,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:async/async.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:worcadeflutter/main.dart';
+import 'package:worcadeflutter/device.dart';
 import 'package:worcadeflutter/model.dart';
 import 'package:worcadeflutter/parser.dart';
-import 'package:worcadeflutter/device.dart';
 
 const api = 'https://dev.worcade.net/api/v2';
 
@@ -50,8 +50,15 @@ Future<Reference> checkStoredApiKey() async {
       as Map<String, dynamic>;
   var me = reference(data['user']);
   _myId = me.id;
-  sendNotificationToken(await firebaseMessaging.getToken(), await deviceName());
+  sendNotificationToken(await FirebaseMessaging().getToken(), await deviceName());
   return me;
+}
+
+Future<void> invalidateApiKey() async {
+  (await SharedPreferences.getInstance()).remove('apikey');
+  http.delete('$api/user/$_myId/apikey', headers: _headers);
+  _apiKey = null;
+  _myId = null;
 }
 
 Future<void> sendNotificationToken(String token, String name) async {

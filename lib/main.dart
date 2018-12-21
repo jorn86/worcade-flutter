@@ -5,11 +5,10 @@ import 'package:worcadeflutter/new_conversation.dart';
 import 'package:worcadeflutter/login.dart';
 import 'package:worcadeflutter/model.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-
-final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
+import 'package:worcadeflutter/sender.dart';
 
 void main() async {
-  firebaseMessaging.requestNotificationPermissions();
+  FirebaseMessaging().requestNotificationPermissions();
   runApp(MyApp());
 }
 
@@ -35,7 +34,7 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    firebaseMessaging.configure(
+    FirebaseMessaging().configure(
       onMessage: (Map<String, dynamic> message) async {
         var id = (message['data'] as Map<dynamic, dynamic>)['conversationId']
             as String;
@@ -59,22 +58,22 @@ class MyHomePage extends StatelessWidget {
     );
     return FutureBuilder(future: checkStoredApiKey(), builder: _buildFirstPage);
   }
+}
 
-  Widget _buildFirstPage(
-      BuildContext context, AsyncSnapshot<Reference> snapshot) {
-    if (snapshot.hasData) {
-      return openConversationList(context, ConversationListQuery.all);
-    }
-    if (snapshot.hasError) {
-      return Scaffold(
-        appBar: AppBar(title: Text('Login to Worcade')),
-        body: LoginPage(),
-      );
-    }
-    return Scaffold(
-        body: Container(
-            child: CircularProgressIndicator(), alignment: Alignment.center));
+Widget _buildFirstPage(
+    BuildContext context, AsyncSnapshot<Reference> snapshot) {
+  if (snapshot.hasData) {
+    return openConversationList(context, ConversationListQuery.all);
   }
+  if (snapshot.hasError) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Login to Worcade')),
+      body: LoginPage(),
+    );
+  }
+  return Scaffold(
+      body: Container(
+          child: CircularProgressIndicator(), alignment: Alignment.center));
 }
 
 Widget scaffold(BuildContext context, String title,
@@ -123,6 +122,14 @@ Widget _buildDrawer(BuildContext context) {
         title: Text('Reported by me'),
         onTap: () => _navigate(ConversationListQuery.reportedByMe),
       ),
+      ListTile(
+        leading: Icon(Icons.exit_to_app),
+        title: Text('Logout'),
+        onTap: () {
+          invalidateApiKey();
+          Navigator.pushAndRemoveUntil(context, MaterialPageRoute<Widget>(builder: (context) => MyHomePage().build(context)), (c) => false);
+        },
+      ),
     ],
   );
 }
@@ -130,15 +137,7 @@ Widget _buildDrawer(BuildContext context) {
 Widget _buildUserProfile(BuildContext context, AsyncSnapshot<User> snapshot) {
   if (snapshot.hasData) {
     return ListTile(
-      leading: ClipRRect(
-        child: Image.network(
-          snapshot.data.picture,
-          width: 30,
-          height: 30,
-          fit: BoxFit.cover,
-        ),
-        borderRadius: BorderRadius.all(const Radius.circular(15)),
-      ),
+      leading: profilePicture(snapshot.data.picture, 30),
       title: Text(snapshot.data.name),
       subtitle: Text(snapshot.data.company),
     );
